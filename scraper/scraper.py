@@ -1,5 +1,6 @@
 import urllib2
 from bs4 import BeautifulSoup
+from multiprocessing.pool import ThreadPool
 
 class Scraper:
     RECIPE_ENDPOINT = "http://www.cocktaildb.com/recipe_detail?id="
@@ -8,17 +9,26 @@ class Scraper:
     LAST_INGREDIENT_INDEX = 631
 
     def scrape_cocktails(self):
-        recipes = []
+        
         # scrape all recipes
-        for id in xrange(1, 100):
-            print id
-            res = urllib2.urlopen(self.RECIPE_ENDPOINT + str(id))
-            if res.getcode() == 200 and res.url == self.RECIPE_ENDPOINT + str(id):
-                soup = BeautifulSoup(res.read(), 'html.parser')
-                recipes.append(self._parse_recipe(soup, id))
-            else:
-                print "Error code: " + str(res.getcode())
-        return recipes
+        def task(start, end):
+            recipes = []
+            for id in xrange(start, end):
+                print id
+                res = urllib2.urlopen(self.RECIPE_ENDPOINT + str(id))
+                if res.getcode() == 200 and res.url == self.RECIPE_ENDPOINT + str(id):
+                    soup = BeautifulSoup(res.read(), 'html.parser')
+                    recipes.append(self._parse_recipe(soup, id))
+                else:
+                    print "Error code: " + str(res.getcode())
+            return recipes
+
+        pool = ThreadPool(processes=4)
+        a = pool.apply_async(task, (1, 10))
+        b = pool.apply_async(task, (10, 20))
+        c = pool.apply_async(task, (20, 30))
+        d = pool.apply_async(task, (30, 40))
+        return a.get() + b.get() + c.get() + d.get()
 
     def scrape_ingredients(self):
         ingredients = []
