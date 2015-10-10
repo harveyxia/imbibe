@@ -9,7 +9,6 @@ class Scraper(object):
     LAST_INGREDIENT_INDEX = 631
 
     def scrape_cocktails(self):
-        
         # scrape all recipes
         def task(start, end):
             recipes = []
@@ -31,7 +30,6 @@ class Scraper(object):
         return a.get() + b.get() + c.get() + d.get()
 
     def scrape_ingredients(self):
-
         def task(start, end):
             ingredients = []
             for id in xrange(start, end):
