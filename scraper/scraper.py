@@ -2,7 +2,7 @@ import urllib2
 from bs4 import BeautifulSoup
 from multiprocessing.pool import ThreadPool
 
-class Scraper:
+class Scraper(object):
     RECIPE_ENDPOINT = "http://www.cocktaildb.com/recipe_detail?id="
     INGR_ENDPOINT = "http://www.cocktaildb.com/ingr_detail?id="
     LAST_RECIPE_INDEX = 4758
@@ -24,33 +24,42 @@ class Scraper:
             return recipes
 
         pool = ThreadPool(processes=4)
-        a = pool.apply_async(task, (1, 10))
-        b = pool.apply_async(task, (10, 20))
-        c = pool.apply_async(task, (20, 30))
-        d = pool.apply_async(task, (30, 40))
+        a = pool.apply_async(task, (1, 1189))
+        b = pool.apply_async(task, (1189, 2378))
+        c = pool.apply_async(task, (2378, 3567))
+        d = pool.apply_async(task, (3567, self.LAST_RECIPE_INDEX))
         return a.get() + b.get() + c.get() + d.get()
 
     def scrape_ingredients(self):
-        ingredients = []
-        for id in xrange(1, 4):
-            print id
-            res = urllib2.urlopen(self.INGR_ENDPOINT + str(id))
-            if res.getcode() == 200 and res.url == self.INGR_ENDPOINT + str(id):
-                soup = BeautifulSoup(res.read(), 'html.parser')
-                ingredients.append(self._parse_ingredient(soup, id))
-            else:
-                print "Error code: " + str(res.getcode())
-        return ingredients
+
+        def task(start, end):
+            ingredients = []
+            for id in xrange(start, end):
+                print id
+                res = urllib2.urlopen(self.INGR_ENDPOINT + str(id))
+                if res.getcode() == 200 and res.url == self.INGR_ENDPOINT + str(id):
+                    soup = BeautifulSoup(res.read(), 'html.parser')
+                    ingredients.append(self._parse_ingredient(soup, id))
+                else:
+                    print "Error code: " + str(res.getcode())
+            return ingredients
+
+        pool = ThreadPool(processes=4)
+        a = pool.apply_async(task, (1, 157))
+        b = pool.apply_async(task, (157, 314))
+        c = pool.apply_async(task, (314, 471))
+        d = pool.apply_async(task, (471, self.LAST_INGREDIENT_INDEX))
+        return a.get() + b.get() + c.get() + d.get()
 
     def _parse_recipe(self, soup, id):
         recipe = {}
         recipe['id'] = id
         recipe['title'] = soup.find(id="wellTitle").get_text().strip().split('\n')[0]
-        recipe['ingredients'] = self._parse_ingredients(soup)
+        recipe['ingredients'] = self._parse_ingredients_for_recipe(soup)
         recipe['directions'] = self._parse_directions(soup)
         return recipe
 
-    def _parse_ingredients(self, soup):
+    def _parse_ingredients_for_recipe(self, soup):
         ingredients = []
         ingrs = soup.find_all("div", {"class":"recipeMeasure"})
         for ingr in ingrs:
@@ -81,11 +90,15 @@ class Scraper:
             elif header_text == 'description':
                 ingredient['description'] = element
             elif header_text == 'flavor':
-                ingredient['flavor'] = element.text
-
-        # href = soup.contents[4].attrs['href']
-        # ingredient['type_name'] = soup.contents[4].get_text()
-        # ingredient['type_id'] = href[href.rfind('category=')+9:]
-        # ingredient['description'] = soup.contents[7]
-        # ingredient['flavor'] = soup.contents[9].get_text()
+                ingredient['flavor'] = self._parse_flavors_for_ingredient(element)
         return ingredient
+
+    # grab all <a> before next h3 tag
+    def _parse_flavors_for_ingredient(self, node):
+        flavors = []
+        while node:
+            if node.name == 'h3':
+                break
+            flavors.append(node.text)
+            node = node.findNextSibling()
+        return flavors
