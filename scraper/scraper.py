@@ -1,6 +1,10 @@
 import urllib2
+import logging
 from bs4 import BeautifulSoup
 from multiprocessing.pool import ThreadPool
+
+logging.basicConfig(filename='exceptions.log',level=logging.ERROR)
+
 
 class Scraper(object):
     RECIPE_ENDPOINT = "http://www.cocktaildb.com/recipe_detail?id="
@@ -14,7 +18,11 @@ class Scraper(object):
             recipes = []
             for id in xrange(start, end):
                 print id
-                res = urllib2.urlopen(self.RECIPE_ENDPOINT + str(id))
+                try:
+                    res = urllib2.urlopen(self.RECIPE_ENDPOINT + str(id))
+                except:
+                    logging.exception('')
+                    continue
                 if res.getcode() == 200 and res.url == self.RECIPE_ENDPOINT + str(id):
                     soup = BeautifulSoup(res.read(), 'html.parser')
                     recipes.append(self._parse_recipe(soup, id))
@@ -34,7 +42,11 @@ class Scraper(object):
             ingredients = []
             for id in xrange(start, end):
                 print id
-                res = urllib2.urlopen(self.INGR_ENDPOINT + str(id))
+                try:
+                    res = urllib2.urlopen(self.INGR_ENDPOINT + str(id))
+                except:
+                    logging.exception('')
+                    continue
                 if res.getcode() == 200 and res.url == self.INGR_ENDPOINT + str(id):
                     soup = BeautifulSoup(res.read(), 'html.parser')
                     ingredients.append(self._parse_ingredient(soup, id))
@@ -48,6 +60,7 @@ class Scraper(object):
         c = pool.apply_async(task, (314, 471))
         d = pool.apply_async(task, (471, self.LAST_INGREDIENT_INDEX))
         return a.get() + b.get() + c.get() + d.get()
+        # return a.get()
 
     def _parse_recipe(self, soup, id):
         recipe = {}
@@ -86,9 +99,10 @@ class Scraper(object):
                 ingredient['type_name'] = element.text
                 ingredient['type_id'] = href[href.rfind('category=')+9:]
             elif header_text == 'description':
-                ingredient['description'] = element
+                ingredient['description'] = unicode(element)
             elif header_text == 'flavor':
                 ingredient['flavor'] = self._parse_flavors_for_ingredient(element)
+                break
         return ingredient
 
     # grab all <a> before next h3 tag
