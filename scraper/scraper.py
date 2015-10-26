@@ -60,7 +60,6 @@ class Scraper(object):
         c = pool.apply_async(task, (314, 471))
         d = pool.apply_async(task, (471, self.LAST_INGREDIENT_INDEX))
         return a.get() + b.get() + c.get() + d.get()
-        # return a.get()
 
     def _parse_recipe(self, soup, id):
         recipe = {}
@@ -89,6 +88,7 @@ class Scraper(object):
 
     def _parse_ingredient(self, soup, id):
         ingredient = {'id': id}
+        ingredient['title'] = soup.find(id="wellTitle").get_text().strip()
         soup = soup.find("div", {"class":"detail"})
         headers = soup.find_all('h3')
         for header in headers:
