@@ -14,24 +14,10 @@ f2.close()
 flavor_count = 1
 flavors = {}
 contains = {}
-ingr_flavor = set()
+ingr_flavor = {}
 ingr_type = set()
 types = set()
-
-# 1. add all cocktails
-# 2. add all ingredients
-# 3. add all contains
-
-# populate imbibe.cocktail
-for cocktail in cocktails:
-    print cocktail['id']
-    cur.execute("INSERT INTO imbibe.cocktail (id, title, directions) VALUES (%s, %s, %s)",
-                (int(cocktail['id']), cocktail['title'], cocktail['directions']) )
-    for ingr in cocktail['ingredients']:
-        # create set to dump later
-        contains[(int(cocktail['id']), int(ingr['id']))] = ingr['q']
-        # cur.execute("INSERT INTO imbibe.contains (cocktail_id, ingredient_id, quantity) VALUES (%s, %s, %s)",
-        #     (int(cocktail['id']), int(ingr['id']), ingr['q']) )
+cocktail_flavors = set()
 
 # populate imbibe.ingredient
 for ingr in ingredients:
@@ -50,15 +36,25 @@ for ingr in ingredients:
                 flavor_count += 1
             else:
                 flavor_id = flavors[flavor]
-            ingr_flavor.add( (ingr_id, flavor_id) )
+            # ingr_flavor.add( (ingr_id, flavor_id) )
+            if ingr_id not in ingr_flavor:
+                ingr_flavor[ingr_id] = set()
+            ingr_flavor[ingr_id].add(flavor_id)
 
-# populate imbibe.type
-for t in types:
-    cur.execute("INSERT INTO imbibe.type (id, title) VALUES (%s, %s)", t)
-
-# populate imbibe.contains
-for k,v in contains.iteritems():
-    cur.execute("INSERT INTO imbibe.contains (cocktail_id, ingredient_id, quantity) VALUES (%s, %s, %s)", (k[0], k[1], v))
+# populate imbibe.cocktail
+for cocktail in cocktails:
+    print cocktail['id']
+    cur.execute("INSERT INTO imbibe.cocktail (id, title, directions) VALUES (%s, %s, %s)",
+                (int(cocktail['id']), cocktail['title'], cocktail['directions']) )
+    for ingr in cocktail['ingredients']:
+        ingr_id = int(ingr['id'])
+        cocktail_id = int(cocktail['id'])
+        # create set to dump later
+        contains[(cocktail_id, ingr_id)] = ingr['q']
+        # find cocktail's ingredient's flavors
+        if ingr_id in ingr_flavor:
+            for flavor_id in ingr_flavor[ingr_id]:
+                cocktail_flavors.add( (cocktail_id, flavor_id) )
 
 # populate imbibe.flavor
 for flavor, id in flavors.iteritems():
@@ -68,8 +64,24 @@ for flavor, id in flavors.iteritems():
     except Exception, e:
         print e.pgerror
 
-for t in ingr_flavor:
-    cur.execute("INSERT INTO imbibe.ingr_flavor (ingredient_id, flavor_id) VALUES (%s, %s)", t)
+# populate imbibe.cocktail_flavors
+for t in cocktail_flavors:
+    cur.execute("INSERT INTO imbibe.cocktail_flavors (cocktail_id, flavor_id) VALUES (%s, %s)", t)
+
+# populate imbibe.type
+for t in types:
+    cur.execute("INSERT INTO imbibe.type (id, title) VALUES (%s, %s)", t)
+
+i = 0
+# populate imbibe.contains
+for k,v in contains.iteritems():
+    print i
+    i += 1
+    cur.execute("INSERT INTO imbibe.contains (cocktail_id, ingredient_id, quantity) VALUES (%s, %s, %s)", (k[0], k[1], v))
+
+for ingr_id, flavor_ids in ingr_flavor.iteritems():
+    for flavor_id in flavor_ids:
+        cur.execute("INSERT INTO imbibe.ingr_flavor (ingredient_id, flavor_id) VALUES (%s, %s)", (ingr_id, flavor_id))
 
 for t in ingr_type:
     cur.execute("INSERT INTO imbibe.ingr_type (ingredient_id, type_id) VALUES (%s, %s)", t)

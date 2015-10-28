@@ -1,0 +1,53 @@
+drop schema imbibe cascade;
+create schema imbibe;
+
+CREATE TABLE imbibe.cocktail
+ (id int NOT NULL,
+  title varchar(1000) NOT NULL,
+  directions varchar(5000),
+  PRIMARY KEY (id));
+
+CREATE TABLE imbibe.ingredient
+ (id int NOT NULL,
+  title varchar(1000) NOT NULL,
+  description varchar(5000),
+  PRIMARY KEY (id));
+
+CREATE TABLE imbibe.flavor
+ (id int NOT NULL,
+  title varchar(1000),
+  PRIMARY KEY (id));
+
+CREATE TABLE imbibe.type
+ (id int NOT NULL,
+  title varchar(1000),
+  PRIMARY KEY (id));
+
+CREATE TABLE imbibe.contains
+ (cocktail_id int,
+  ingredient_id int,
+  quantity varchar(1000),
+  PRIMARY KEY (cocktail_id, ingredient_id),
+  FOREIGN KEY (cocktail_id) REFERENCES imbibe.cocktail(id),
+  FOREIGN KEY (ingredient_id) REFERENCES imbibe.ingredient(id));
+
+CREATE TABLE imbibe.ingr_flavor
+ (ingredient_id int,
+  flavor_id int,
+  PRIMARY KEY (ingredient_id, flavor_id),
+  FOREIGN KEY (ingredient_id) REFERENCES imbibe.ingredient(id),
+  FOREIGN KEY (flavor_id) REFERENCES imbibe.flavor(id));
+
+CREATE TABLE imbibe.ingr_type
+ (ingredient_id int,
+  type_id int,
+  PRIMARY KEY (ingredient_id, type_id),
+  FOREIGN KEY (ingredient_id) REFERENCES imbibe.ingredient(id),
+  FOREIGN KEY (type_id) REFERENCES imbibe.type(id));
+
+CREATE TABLE imbibe.cocktail_flavors
+  (cocktail_id int,
+   flavor_id int,
+   PRIMARY KEY (cocktail_id, flavor_id),
+   FOREIGN KEY (cocktail_id) REFERENCES imbibe.cocktail(id),
+   FOREIGN KEY (flavor_id) REFERENCES imbibe.flavor(id));
