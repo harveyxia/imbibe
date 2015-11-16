@@ -2,17 +2,22 @@ import psycopg2
 import pickle
 import os
 import urlparse
+import sys
 
-urlparse.uses_netloc.append("postgres")
-url = urlparse.urlparse(os.environ["DATABASE_URL"])
-conn = psycopg2.connect(
-    database=url.path[1:],
-    user=url.username,
-    password=url.password,
-    host=url.hostname,
-    port=url.port
-)
-cur = conn.cursor()
+if len(sys.argv) < 2 or sys.argv[1] != 'localhost':
+    urlparse.uses_netloc.append("postgres")
+    url = urlparse.urlparse(os.environ["DATABASE_URL"])
+    conn = psycopg2.connect(
+        database=url.path[1:],
+        user=url.username,
+        password=url.password,
+        host=url.hostname,
+        port=url.port
+    )
+    cur = conn.cursor()
+else:
+    conn = psycopg2.connect("host=localhost user=harvey")
+    cur = conn.cursor()
 
 f1 = open("cocktails.pickle", "rb")
 f2 = open("ingredients.pickle", "rb")

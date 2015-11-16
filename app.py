@@ -9,10 +9,17 @@ client = Client()
 def index():
     return render_template('index.html')
 
+@app.route('/cocktail/<id>')
+def get_cocktail(id):
+    cocktail = client.get_cocktail_by_id(id)
+    # return render_template('cocktail.html', title=cocktail['title'], directions=cocktail['directions'])
+    return render_template('cocktail.html', cocktail=cocktail)
+
 @app.route('/search')
-def find_cocktail_by_flavors():
+def get_cocktail_by_flavors():
     flavor_ids = parse_flavor_ids(request.args)
-    # cocktails = client.find_cocktail_by_flavors(flavor_ids)
+    cocktails = client.get_cocktail_by_flavors(flavor_ids)
+    print cocktails
     return "hello"
 
 def parse_flavor_ids(args):
