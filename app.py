@@ -3,7 +3,7 @@ from psql_client import Client
 from flask import Flask, render_template, request
 app = Flask(__name__)
 
-# client = Client()
+client = Client()
 
 @app.route('/')
 def index():

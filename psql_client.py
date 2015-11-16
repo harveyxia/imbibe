@@ -1,9 +1,18 @@
 import psycopg2
+import urlparse
 
 class Client(object):
 
     def __init__(self):
-        conn = psycopg2.connect("host=lab.zoo.cs.yale.edu user=hx52 password=whispering")
+        urlparse.uses_netloc.append("postgres")
+        url = urlparse.urlparse(os.environ["DATABASE_URL"])
+        conn = psycopg2.connect(
+            database=url.path[1:],
+            user=url.username,
+            password=url.password,
+            host=url.hostname,
+            port=url.port
+        )
         cur = conn.cursor()
 
     def find_cocktail_by_flavors(self, flavors):
