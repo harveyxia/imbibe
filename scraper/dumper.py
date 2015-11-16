@@ -1,5 +1,6 @@
 import psycopg2
 import pickle
+import os
 import urlparse
 
 urlparse.uses_netloc.append("postgres")
