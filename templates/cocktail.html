@@ -1,7 +1,24 @@
 <!doctype html>
 <link rel="stylesheet" type="text/css" href="/static/semantic.min.css">
+<link rel="stylesheet" type="text/css" href="/static/style.css">
 <script src="/static/jquery-2.1.4.min.js"></script>
 <script src="/static/semantic.min.js"></script>
 <title>Cocktail</title>
 <h1> {{ cocktail.title }}</h1>
+
+<ul>
+{% for ingr in cocktail.ingredients %}
+  <li>
+    <a href="#">{{ ingr.quantity ~ " " ~ ingr.title }}</a>
+    <div class="hidden"> {{ ingr.description }} </div>
+  </li>
+{% endfor %}
+</ul>
+
 <div> {{ cocktail.directions }}</div>
+
+<script type="text/javascript">
+    $('a').click(function() {
+        $(this).next().toggle(100);
+    });
+</script>
