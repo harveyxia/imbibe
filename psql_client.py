@@ -43,11 +43,6 @@ class Client(object):
         self.cur.execute(q)
         return self.cur.fetchall()
 
-# select cocktail_id from imbibe.cocktail_flavors where flavor_id=2 and (cocktail_id, 3) in (select * from imbibe.cocktail_flavors) and (cocktail_id, 11) in (select * from imbibe.cocktail_flavors) and (cocktail_id, 9) in (select * from imbibe.cocktail_flavors);
-
-# with t as (select * from imbibe.cocktail_flavors)
-# select cocktail_id from imbibe.cocktail_flavors
-#   where flavor_id=2
-#   and (cocktail_id, 3) in (select * from t)
-#   and (cocktail_id, 11) in (select * from t)
-#   and (cocktail_id, 9) in (select * from t);
+    def get_most_used_flavors(self):
+        q = "select id, title, count from (select flavor_id, count(cocktail_id) from imbibe.cocktail_flavors group by flavor_id order by count(cocktail_id) desc) as t join imbibe.flavor on t.flavor_id=imbibe.flavor.id order by count desc;"
+        return self.cur.execute(q).fetchall()
