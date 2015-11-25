@@ -4,4 +4,20 @@
 
 .main {
     width: 700px !important;
+    margin-top: 100px;
+    background-color: rgba(255,255,255,0.65);
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.center {
+    margin: 0 auto;
+}
+
+body {
+    background: url(/static/background.jpeg) no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
 }

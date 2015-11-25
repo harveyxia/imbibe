@@ -6,16 +6,6 @@ psycopg2.extensions.register_type(psycopg2.extensions.UNICODEARRAY)
 class Client(object):
 
     def __init__(self):
-        # urlparse.uses_netloc.append("postgres")
-        # url = urlparse.urlparse(os.environ["DATABASE_URL"])
-        # conn = psycopg2.connect(
-        #     database=url.path[1:],
-        #     user=url.username,
-        #     password=url.password,
-        #     host=url.hostname,
-        #     port=url.port
-        # )
-        # cur = conn.cursor()
         self.conn = psycopg2.connect("host=localhost user=harvey")
         self.cur = self.conn.cursor()
 

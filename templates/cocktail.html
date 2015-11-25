@@ -18,11 +18,19 @@
         {% endfor %}
     </ul>
     <div> {{ cocktail.directions }}</div>
+    <br>
+
+    <div style="width:200px;" class="center">
+        <div class="ui blue submit button">Mix Another</div>
+    </div>
 </div>
 </body>
 
 <script type="text/javascript">
     $('a').click(function () {
         $(this).next().toggle(100);
+    });
+    $('.ui.blue.submit.button').on('click', function () {
+        window.location.href = "/";
     });
 </script>
