@@ -19,9 +19,13 @@
     </ul>
     <div> {{ cocktail.directions }}</div>
     <br>
-
-    <div style="width:200px;" class="center">
-        <div class="ui blue submit button">Mix Another</div>
+    <div style="text-align: center;">
+        <div style="width:200px; display: inline;" class="center">
+            <div class="ui blue submit button similar">Mix Similar</div>
+        </div>
+        <div style="width:200px; display: inline;" class="center">
+            <div class="ui blue submit button another">Mix Another</div>
+        </div>
     </div>
 </div>
 </body>
@@ -30,7 +34,10 @@
     $('a').click(function () {
         $(this).next().toggle(100);
     });
-    $('.ui.blue.submit.button').on('click', function () {
+    $('.ui.blue.submit.button.similar').on('click', function () {
+        location.reload();
+    });
+    $('.ui.blue.submit.button.another').on('click', function () {
         window.location.href = "/";
     });
 </script>
